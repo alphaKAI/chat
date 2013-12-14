@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="author" content="tosainu">
+    <meta name="generator" content="Vim">
+    <title>Node.js Test Page.</title>
+  </head>
+  <body>
+    <h1>Node.js&nbsp;Chat&nbsp;&nbsp;(KUSO)</h1>
+
+    <form name="send">
+      <p>Name:<input type="text" name="name" size="20">&nbsp;
+        Text:<input type="text" name="text" size="40">
+        <input type="button" value="post" onclick="post();"/>
+      </p>
+    </form>
+
+    <hr>
+
+    <div id="log">
+    </div>
+
+  </body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io.connect('http://project-o.info:3000/');
+
+    function post(){
+      socket.emit('post', document.send.name.value + ' : ' + document.send.text.value);
+      document.send.text.value = "";
+    }
+
+    socket.on('post', function (data) {
+      var element = document.createElement("div");
+      element.innerHTML = data; 
+      var object = document.getElementById("log");
+      object.appendChild(element);
+    });
+
+    window.onload = function (){
+      var list = document.getElementsByTagName("input");
+      for(var i=0; i<list.length; i++){
+        if(list[i].type == 'text' || list[i].type == 'password'){
+          list[i].onkeypress = function (event){
+            return submitStop(event);
+          };
+        }
+      }
+    }
+  </script>
+</html>
+

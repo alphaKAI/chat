@@ -5,11 +5,10 @@ var app = require('http').createServer(handler)
   , io  = require('socket.io').listen(app).set('log level', 1)
   , fs  = require('fs')
   , mime= require('mime')
-  , crypto = require('crypto')
 
 app.listen(3000);
 
-function handler (req, res) {
+function handler(req, res) {
   // Check File Path
   var path;
   if(req.url == '/') {
@@ -31,23 +30,29 @@ function handler (req, res) {
   });
 }
 
-var createId = function(key) {
-  var hmac = crypto.createHmac('sha256', 'Z7%nKu8&i9,2');
-  hmac.update(key);
-  return hmac.digest('hex').slice(0,12);
-}; 
+function getOnlineUser(member) {
+  var res = '';
+  for(var key in member) {
+    res += key.slice(0,6) + ' ';
+  }
+  return res;
+}
 
 io.sockets.on('connection', function (socket) {
+  // Connect User
+  console.log(socket.id + ' : connect');
+  io.sockets.emit('join', { state: 1, id: socket.id.slice(0,6), online: getOnlineUser(socket.manager.open)});
 
-  console.log(socket.handshake.address.address);
-  io.sockets.emit('join', { state: 1, id: createId(socket.handshake.address.address)});
-
+  // Handling the post.
   socket.on('post', function (data) {
-    console.log(createId(socket.handshake.address.address) + ' : ' + data.text);
-    io.sockets.emit('post', { name: data.name + '(' + createId(socket.handshake.address.address) + ')', text: data.text});
+    console.log(socket.id+ ' : ' + data.text);
+    
+    io.sockets.emit('post', { name: data.name + '(' + socket.id.slice(0,6) + ')', text: data.text});
   });
 
+  // Disconnect User
   socket.on('disconnect', function(){
-    io.sockets.emit('join', { status: 0, id: createId(socket.handshake.address.address)});
+    console.log(socket.id + ' : disconnect');
+    io.sockets.emit('join', { status: 0, id: socket.id.slice(0,6), online: getOnlineUser(socket.manager.open)});
   });
 });

@@ -19,6 +19,8 @@
 
     <hr>
 
+    <p>Online : <span id="online"></span></p>
+
     <div id="log">
     </div>
 
@@ -29,12 +31,17 @@
   <script>
     var socket = io.connect('http://myon.pgw.jp:3000/');
 
+    // Escape
+    function escape(s) {return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');}
+
     // User join.
     socket.on('join', function (data) {
       var element = document.createElement("div");
-      (data.state)? element.innerText = data.id + ' was connected.' : element.innerText = data.id + ' was disconnected.'; 
+      (data.state)? element.innerHTML = escape('SYSTEM > ' + data.id + ' was connected.') : element.innerHTML = escape('SYSTEM > ' + data.id + ' was disconnected.'); 
       var object = document.getElementById("log");
       object.appendChild(element);
+
+      document.getElementById("online").innerHTML = escape(data.online);
     });
     
     // Post Text.
@@ -46,7 +53,7 @@
     // Get Posts.
     socket.on('post', function (data) {
       var element = document.createElement("div");
-      element.innerText = data.name + ' : ' + data.text; 
+      element.innerHTML = escape(data.name + ' : ' + data.text); 
       var object = document.getElementById("log");
       object.appendChild(element);
     });

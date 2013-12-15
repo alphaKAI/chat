@@ -1,20 +1,22 @@
 /*
-  main.js
+  chat.js
 */
 var app = require('http').createServer(handler)
-  , io  = require('socket.io').listen(app)
+  , io  = require('socket.io').listen(app).set('log level', 1)
   , fs  = require('fs')
   , mime= require('mime')
+  , crypto = require('crypto')
+
 app.listen(3000);
 
 function handler (req, res) {
   // Check File Path
   var path;
   if(req.url == '/') {
-    path = './index.html';
+    path = './files/index.html';
   }
   else {
-    path = '.' + req.url;
+    path = './files' + req.url;
   }
   // Read File and Write
   fs.readFile(path, function (err, data) {
@@ -29,9 +31,23 @@ function handler (req, res) {
   });
 }
 
+var createId = function(key) {
+  var hmac = crypto.createHmac('sha256', 'Z7%nKu8&i9,2');
+  hmac.update(key);
+  return hmac.digest('hex').slice(0,12);
+}; 
+
 io.sockets.on('connection', function (socket) {
+
+  console.log(socket.handshake.address.address);
+  io.sockets.emit('join', { state: 1, id: createId(socket.handshake.address.address)});
+
   socket.on('post', function (data) {
-    console.log(data);
-    io.sockets.emit('post', data);
+    console.log(createId(socket.handshake.address.address) + ' : ' + data.text);
+    io.sockets.emit('post', { name: data.name + '(' + createId(socket.handshake.address.address) + ')', text: data.text});
+  });
+
+  socket.on('disconnect', function(){
+    io.sockets.emit('join', { status: 0, id: createId(socket.handshake.address.address)});
   });
 });

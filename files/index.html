@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="author" content="tosainu">
     <meta name="generator" content="Vim">
-    <title>Node.js Test Page.</title>
+    <title>Node.js Chat.</title>
   </head>
   <body>
     <h1>Node.js&nbsp;Chat&nbsp;&nbsp;(KUSO)</h1>
@@ -23,21 +23,41 @@
     </div>
 
   </body>
+    
   <script src="/socket.io/socket.io.js"></script>
+
   <script>
-    var socket = io.connect('http://project-o.info:3000/');
+    var socket = io.connect('http://myon.pgw.jp:3000/');
 
-    function post(){
-      socket.emit('post', document.send.name.value + ' : ' + document.send.text.value);
-      document.send.text.value = "";
-    }
-
-    socket.on('post', function (data) {
+    // User join.
+    socket.on('join', function (data) {
       var element = document.createElement("div");
-      element.innerHTML = data; 
+      (data.state)? element.innerText = data.id + ' was connected.' : element.innerText = data.id + ' was disconnected.'; 
       var object = document.getElementById("log");
       object.appendChild(element);
     });
+    
+    // Post Text.
+    function post(){
+      socket.emit('post', { name: document.send.name.value, text: document.send.text.value });
+      document.send.text.value = "";
+    }
+
+    // Get Posts.
+    socket.on('post', function (data) {
+      var element = document.createElement("div");
+      element.innerText = data.name + ' : ' + data.text; 
+      var object = document.getElementById("log");
+      object.appendChild(element);
+    });
+
+    function submitStop(e){
+      if(!e) var e = window.event;
+      if(e.keyCode == 13) {
+        post();
+        return false;
+      }
+    }
 
     window.onload = function (){
       var list = document.getElementsByTagName("input");
@@ -51,4 +71,3 @@
     }
   </script>
 </html>
-

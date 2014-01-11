@@ -75,11 +75,16 @@ io.sockets.on('connection', function (socket) {
         socket.emit('post', { id: results[cnt].id, date: results[cnt].date, ip: createId(results[cnt].ip), name: results[cnt].name, text: results[cnt].text });
       }
     }
-    io.sockets.emit('join', { state: 1, ip: createId(socket.handshake.address.address), online: getOnlineUser(socket.manager.open)});
+    io.sockets.emit('message', { type: 'join', state: 1, ip: createId(socket.handshake.address.address) });
   });
 
   // Handling the post.
   socket.on('post', function (data) {
+    if(data.text == (null||' '||'　')) {
+      socket.emit('message', { type: 'error', text: 'Invalid string.' });
+      return false;
+    }
+
     // Write to the DB.
     var date = new Date();
     var query = connection.query("insert into chat_logs (date,ip,name,text) value('" + date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "','" + socket.handshake.address.address + "','" + data.name + "','" + data.text + "')", function(err) {
@@ -106,6 +111,6 @@ io.sockets.on('connection', function (socket) {
   // Disconnect User
   socket.on('disconnect', function(){
     console.log(socket.handshake.address.address + ' : disconnect');
-    io.sockets.emit('join', { status: 0, ip: createId(socket.handshake.address.address), online: getOnlineUser(socket.manager.open)});
+    io.sockets.emit('message', { type: 'join', status: 0, ip: createId(socket.handshake.address.address) });
   });
 });

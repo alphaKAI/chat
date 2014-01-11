@@ -1,5 +1,6 @@
 # chat.js
-This is a Chat program written in Node.js.
+This is a Chat program written in Node.js.  
+It's running here. <http://myon.info:3000/>
 
 ## Requirements
 * Node.js
@@ -9,6 +10,12 @@ This is a Chat program written in Node.js.
 Install dependencies:
 
     npm install crypto mime mysql socket.io
+
+Create Table:
+
+    create table caht_logs(id int auto_increment primary key,date datetime,ip varchar(20),name varchar(20),text varchar(200));
+
+Modify `chat.js` and `www/index.html`.
 
 Run:
 

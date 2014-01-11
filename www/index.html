@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="This is a Chat program written in Node.js.">
+    <meta name="author" content="Tosainu">
+    <meta name="generator" content="Vim">
+    <title>chat.js</title>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">chat.js</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Nav header</li>
+                <li><a href="#">Separated link</a></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <form role="form" name="send">
+        <div class="form-group">
+          <label class="sr-only" for="name">Name</label>
+          <input type="text" class="form-control" id="name" name="name" placeholder="Name">
+        </div>
+        <div class="form-group">
+          <label class="sr-only" for="text">Text</label>
+          <input type="text" class="form-control" id="text" name="text" placeholder="text">
+        </div>
+        <div class="form-group">
+          <button type="button" class="btn btn-default" onclick="post();">Post</button>
+        </div>
+      </form>
+
+      <div id="log"></div>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io.connect('http://localhost:3000/');
+
+      // Escape
+      function escape(s) {return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');}
+
+      // User join.
+      socket.on('join', function (data) {
+        var object = document.getElementById("log");
+        object.innerHTML = '<div class="alert alert-info">' + (data.state ? ('<strong>Message</strong> ' + data.ip + ' was connected.') : escape('<strong>Message</strong> ' + data.ip + ' was disconnected.')) + '</div>\n' + object.innerHTML;
+      });
+
+      // Post Text.
+      function post(){
+        socket.emit('post', { name: document.send.name.value, text: document.send.text.value });
+        document.send.text.value = "";
+      }
+
+      // Get Posts.
+      socket.on('post', function (data) {
+        var object = document.getElementById("log");
+        object.innerHTML = '<div class="panel panel-default"><div class="panel-heading"><h3 class="panel-title">' + data.id + ' ' + escape(data.name) + ' <small>ID:' + data.ip + ' Date:' + data.date + '</small></h3></div><div class="panel-body">' + escape(data.text) + '</div></div>\n' + object.innerHTML;
+        //object.appendChild(element);
+      });
+    </script>
+  </body>
+</html>

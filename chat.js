@@ -87,7 +87,7 @@ io.sockets.on('connection', function (socket) {
 
     // Write to the DB.
     var date = new Date();
-    var query = connection.query("insert into chat_logs (date,ip,name,text) value('" + date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "','" + socket.handshake.address.address + "','" + data.name + "','" + data.text + "')", function(err) {
+    var query = connection.query("insert into chat_logs (date,ip,name,text) value('" + date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "','" + socket.handshake.address.address + "','" + data.name.replace(/'/g, "''") + "','" + data.text.replace(/'/g, "''") + "')", function(err) {
       if(err) {
         console.log(err);
       }
